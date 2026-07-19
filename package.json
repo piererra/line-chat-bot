@@ -1,0 +1,14 @@
+{
+  "name": "line-chat-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LINE Messaging API bot for the group chat — welcomes new members, replies to commands, and tracks known groups.",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
