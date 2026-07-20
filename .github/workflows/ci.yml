@@ -19,8 +19,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
+          # No `cache: npm` — that requires a committed package-lock.json
+          # (or yarn.lock/npm-shrinkwrap.json) to key the cache off of,
+          # which this repo doesn't have. Caching is a speed optimization,
+          # not a requirement, so plain npm install works fine without it.
 
       - run: npm install
 
