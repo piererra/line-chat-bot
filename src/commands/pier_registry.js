@@ -23,13 +23,7 @@ import * as pier_groups from './admin/pier_groups.js';
 // Public ('!' prefix) commands — open to everyone, no admin gate. Each
 // handler sends its own reply and the dispatcher returns immediately
 // after a match.
-export const pier_publicCommands = [
-  pier_whoami,
-  pier_leaderboard,
-  pier_setbirthday,
-  pier_picture,
-  pier_help,
-];
+export const pier_publicCommands = [pier_whoami, pier_leaderboard, pier_setbirthday, pier_picture, pier_help];
 
 // Admin ('-' prefix) commands — only reachable after the isBotAdmin gate
 // in webhook.js. Each handler returns a reply message array, folded into

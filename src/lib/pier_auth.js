@@ -10,7 +10,9 @@
 
 export function pier_getOwnerUserIds(pier_env) {
   if (!pier_env.OWNER_USER_ID) return [];
-  return pier_env.OWNER_USER_ID.split(',').map((id) => id.trim()).filter(Boolean);
+  return pier_env.OWNER_USER_ID.split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
 }
 
 export async function pier_isBotAdmin(pier_env, pier_chatId, pier_userId) {

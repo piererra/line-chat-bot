@@ -12,7 +12,9 @@ export async function pier_handleMemberLeft(pier_event, pier_env) {
   if (!pier_chatId || !pier_members.length) return;
 
   const pier_template = await pier_getLeaveTemplate(pier_env, pier_chatId);
-  const pier_known = pier_parseKnownMembers(pier_env.BOT_KV ? await pier_env.BOT_KV.get(pier_scopedKey('known_members', pier_chatId), { cacheTtl: 30 }) : null);
+  const pier_known = pier_parseKnownMembers(
+    pier_env.BOT_KV ? await pier_env.BOT_KV.get(pier_scopedKey('known_members', pier_chatId), { cacheTtl: 30 }) : null
+  );
 
   for (const pier_m of pier_members) {
     const pier_displayName = pier_known.find((k) => k.userId === pier_m.userId)?.displayName || 'Someone';
