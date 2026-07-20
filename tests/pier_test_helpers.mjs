@@ -41,11 +41,7 @@ export async function pier_buildWebhookRequest(pier_events, pier_channelSecret) 
 // A no-op execution context — mirrors real Workers waitUntil behavior
 // (fire-and-forget) closely enough for tests that don't need to assert on
 // backgrounded work specifically.
-export const pier_fakeExecCtx = {
-  waitUntil: (pier_promise) => {
-    pier_promise.catch(() => {});
-  },
-};
+export const pier_fakeExecCtx = { waitUntil: (pier_promise) => { pier_promise.catch(() => {}); } };
 
 // Default test env — override individual fields per test as needed.
 export function pier_makeEnv(pier_overrides = {}) {

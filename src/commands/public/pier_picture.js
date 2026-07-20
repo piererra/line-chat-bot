@@ -25,9 +25,7 @@ export async function pier_handle(pier_ctx) {
     return;
   }
 
-  const pier_members = pier_env.BOT_KV
-    ? pier_parseKnownMembers(await pier_env.BOT_KV.get(pier_scopedKey('known_members', pier_chatId), { cacheTtl: 30 }))
-    : [];
+  const pier_members = pier_env.BOT_KV ? pier_parseKnownMembers(await pier_env.BOT_KV.get(pier_scopedKey('known_members', pier_chatId), { cacheTtl: 30 })) : [];
   const pier_targetUserId = pier_resolveMentionedUserId(pier_event, pier_members);
 
   if (!pier_targetUserId) {

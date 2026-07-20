@@ -173,14 +173,7 @@ async function pier_handleTextMessage(pier_event, pier_env) {
     }
   }
 
-  const pier_ctx = {
-    event: pier_event,
-    env: pier_env,
-    text: pier_text,
-    chatId: pier_chatId,
-    isGroupOrRoom: pier_isGroupOrRoom,
-    extraMessages: pier_extraMessages,
-  };
+  const pier_ctx = { event: pier_event, env: pier_env, text: pier_text, chatId: pier_chatId, isGroupOrRoom: pier_isGroupOrRoom, extraMessages: pier_extraMessages };
 
   // -whoami on/off is a global, owner-only switch, checked before every
   // other command (including public ones) — see pier_whoami_toggle.js.

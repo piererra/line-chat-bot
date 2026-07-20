@@ -111,6 +111,8 @@ the first one that matches. Shared helpers in `lib/` have no knowledge of
 any specific command; commands import from `lib/` and `events/`, never
 the other way around.
 
+
+
 Commands split by prefix: `-` is admin-only (gated by the bot-admin
 system below), `!` is open to everyone. `-help` lists the admin
 commands; `!help` lists only the public ones, so regular members never
@@ -120,25 +122,25 @@ and uniform. Settings are scoped per group/room — each group the bot is
 in has its own independent welcome message, leave message, sider
 toggle, and level-up toggle.
 
-| Command                        | Who                      | What                                                                                                                                                                                                                         |
-| ------------------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `!help`                        | anyone                   | lists public commands                                                                                                                                                                                                        |
-| `!whoami`                      | anyone (unless disabled) | shows your own userId                                                                                                                                                                                                        |
-| `!leaderboard [n]`             | anyone                   | shows the top `n` (default 10) most active members this week, with each member's permanent level, for this group only; also auto-posted daily at 00:00 WIB — the weekly count resets every Monday at 00:00 WIB, levels don't |
-| `!setbirthday MM-DD`           | anyone                   | sets your own birthday (no year) for this group — triggers an auto-mention on the day                                                                                                                                        |
-| `!picture @name`               | anyone                   | shows a tagged member's profile picture — groups only (not rooms/1:1); tag resolution can fail if LINE withholds the mentionee's userId, see **Features**                                                                    |
-| `-whoami on` / `-whoami off`   | bot owner only           | enables/disables the public `!whoami` command bot-wide, in every group                                                                                                                                                       |
-| `-help`                        | admins                   | lists admin commands                                                                                                                                                                                                         |
-| `-testwelcome`                 | admins                   | previews the welcome message, tagging you, and also shows the raw template text                                                                                                                                              |
-| `-setwelcome <text>`           | admins                   | sets the welcome template; use `{mention}` where the tag(s) should go                                                                                                                                                        |
-| `-testleavemsg`                | admins                   | previews the leave message, using your name, and also shows the raw template text                                                                                                                                            |
-| `-setleavemsg <text>`          | admins                   | sets the leave template; use `{name}` (plain text, not a tag — the person's already left by the time this fires)                                                                                                             |
-| `-groups`                      | admins                   | lists every tracked group by name with a live member count (rooms show as "multi-person chat, no name" — LINE rooms have no name at all)                                                                                     |
-| `-sider on` / `-sider off`     | admins                   | toggles random lurker callouts — NOT real read-receipt detection (LINE gives bots no such signal); just a random chance + cooldown after qualifying messages                                                                 |
-| `-levelup on` / `-levelup off` | admins                   | toggles level-up congratulation messages for this group (default on)                                                                                                                                                         |
-| `-unsend on` / `-unsend off`   | admins                   | toggles showing a message's content after it's unsent, for this group (default off — spends monthly quota, see **Features**)                                                                                                 |
-| _(no command)_                 | admins                   | send a sticker in the group set as `LINE_GROUP_ID` to silently register it, globally for every group — see **Sticker triggers** above                                                                                        |
-| `-status`                      | admins                   | bot version, live KV health check, monthly message quota usage, and current server time                                                                                                                                      |
+| Command | Who | What |
+|---|---|---|
+| `!help` | anyone | lists public commands |
+| `!whoami` | anyone (unless disabled) | shows your own userId |
+| `!leaderboard [n]` | anyone | shows the top `n` (default 10) most active members this week, with each member's permanent level, for this group only; also auto-posted daily at 00:00 WIB — the weekly count resets every Monday at 00:00 WIB, levels don't |
+| `!setbirthday MM-DD` | anyone | sets your own birthday (no year) for this group — triggers an auto-mention on the day |
+| `!picture @name` | anyone | shows a tagged member's profile picture — groups only (not rooms/1:1); tag resolution can fail if LINE withholds the mentionee's userId, see **Features** |
+| `-whoami on` / `-whoami off` | bot owner only | enables/disables the public `!whoami` command bot-wide, in every group |
+| `-help` | admins | lists admin commands |
+| `-testwelcome` | admins | previews the welcome message, tagging you, and also shows the raw template text |
+| `-setwelcome <text>` | admins | sets the welcome template; use `{mention}` where the tag(s) should go |
+| `-testleavemsg` | admins | previews the leave message, using your name, and also shows the raw template text |
+| `-setleavemsg <text>` | admins | sets the leave template; use `{name}` (plain text, not a tag — the person's already left by the time this fires) |
+| `-groups` | admins | lists every tracked group by name with a live member count (rooms show as "multi-person chat, no name" — LINE rooms have no name at all) |
+| `-sider on` / `-sider off` | admins | toggles random lurker callouts — NOT real read-receipt detection (LINE gives bots no such signal); just a random chance + cooldown after qualifying messages |
+| `-levelup on` / `-levelup off` | admins | toggles level-up congratulation messages for this group (default on) |
+| `-unsend on` / `-unsend off` | admins | toggles showing a message's content after it's unsent, for this group (default off — spends monthly quota, see **Features**) |
+| *(no command)* | admins | send a sticker in the group set as `LINE_GROUP_ID` to silently register it, globally for every group — see **Sticker triggers** above |
+| `-status` | admins | bot version, live KV health check, monthly message quota usage, and current server time |
 
 All commands are typed directly in the chat they apply to — there's no
 separate rich menu or tap UI; every admin action that used to live on
@@ -146,7 +148,7 @@ one is now just a `-` command like everything else.
 
 ## Bot admin system
 
-`OWNER_USER_ID` (a secret, see below) is the _only_ source of admin
+`OWNER_USER_ID` (a secret, see below) is the *only* source of admin
 status — it can hold one or more comma-separated userIds, and everyone
 listed is an admin, in every group, permanently (e.g. `OWNER_USER_ID =
 Uabc...,Udef...`). There's no in-chat command to grant or list admins;
@@ -184,12 +186,12 @@ worker directly (Settings → Variables and Secrets).
 3. Set these as environment variables / secrets on the worker (Settings
    → Variables and Secrets):
 
-   | Variable                    | Value                                                                                                                                                                                                                                                                                           |
-   | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | `LINE_CHANNEL_SECRET`       | from step 1                                                                                                                                                                                                                                                                                     |
-   | `LINE_CHANNEL_ACCESS_TOKEN` | from step 1                                                                                                                                                                                                                                                                                     |
-   | `OWNER_USER_ID`             | one or more comma-separated LINE userIds (get via `!whoami`) — always bot admins, everywhere                                                                                                                                                                                                    |
-   | `LINE_GROUP_ID`             | (optional) the one group where an admin sending a sticker silently auto-registers its keywords as triggers, usable globally in every group — find this group's id via your Worker's logs (each webhook event includes `source.groupId`). Leave unset to disable sticker auto-capture everywhere |
+   | Variable | Value |
+   |---|---|
+   | `LINE_CHANNEL_SECRET` | from step 1 |
+   | `LINE_CHANNEL_ACCESS_TOKEN` | from step 1 |
+   | `OWNER_USER_ID` | one or more comma-separated LINE userIds (get via `!whoami`) — always bot admins, everywhere |
+   | `LINE_GROUP_ID` | (optional) the one group where an admin sending a sticker silently auto-registers its keywords as triggers, usable globally in every group — find this group's id via your Worker's logs (each webhook event includes `source.groupId`). Leave unset to disable sticker auto-capture everywhere |
 
 4. Once deployed, copy the worker's URL and paste it into the LINE
    Developers Console's **Webhook URL** field, then hit **Verify**, then
@@ -214,7 +216,7 @@ termux-setup-storage   # approve the storage permission prompt — needed
 
 `wrangler`'s runtime dependency (`workerd`) has no prebuilt binary for
 Android — its install script hard-fails there (not just a warning),
-which aborts the _entire_ `npm install`, taking `eslint`/`prettier`
+which aborts the *entire* `npm install`, taking `eslint`/`prettier`
 down with it even though those are plain JS with no such problem. This
 doesn't matter in practice: deploys run through Cloudflare's own build
 pipeline (real Linux, no issue there), not `wrangler` on the phone. So

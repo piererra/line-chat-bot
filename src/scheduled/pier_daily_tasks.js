@@ -47,11 +47,10 @@ export async function pier_runDailyScheduledTasks(pier_env, pier_scheduledTime) 
 
   await pier_announceBirthdays(pier_env, pier_date);
 
-  const pier_isMonday =
-    new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Asia/Jakarta',
-      weekday: 'long',
-    }).format(pier_date) === 'Monday';
+  const pier_isMonday = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Jakarta',
+    weekday: 'long',
+  }).format(pier_date) === 'Monday';
 
   if (pier_isMonday) {
     await pier_resetAllGroupLeaderboards(pier_env);
@@ -84,7 +83,9 @@ async function pier_resetAllGroupLeaderboards(pier_env) {
   const pier_groups = await pier_getKnownGroups(pier_env);
   for (const pier_g of pier_groups) {
     try {
-      await pier_withKnownMembersLock(pier_env, pier_g.chatId, (pier_members) => pier_members.map((m) => ({ ...m, messageCount: 0 })));
+      await pier_withKnownMembersLock(pier_env, pier_g.chatId, (pier_members) =>
+        pier_members.map((m) => ({ ...m, messageCount: 0 }))
+      );
     } catch (pier_err) {
       console.error('pier_resetAllGroupLeaderboards failed for', pier_g.chatId, pier_err);
     }

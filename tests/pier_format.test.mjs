@@ -40,9 +40,7 @@ test('pier_buildLeaderboardText handles no activity at all', () => {
 });
 
 test('pier_resolveMentionedUserId returns the tagged userId when LINE provides one', () => {
-  const pier_event = {
-    message: { text: '@Alice hi', mention: { mentionees: [{ type: 'user', userId: 'U1', index: 0, length: 6, isSelf: false }] } },
-  };
+  const pier_event = { message: { text: '@Alice hi', mention: { mentionees: [{ type: 'user', userId: 'U1', index: 0, length: 6, isSelf: false }] } } };
   assert.equal(pier_resolveMentionedUserId(pier_event, []), 'U1');
 });
 

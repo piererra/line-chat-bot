@@ -11,33 +11,14 @@ export function pier_matches(pier_text) {
 }
 
 export async function pier_handle(pier_ctx) {
-  const {
-    event: pier_event,
-    env: pier_env,
-    text: pier_text,
-    chatId: pier_chatId,
-    isGroupOrRoom: pier_isGroupOrRoom,
-    extraMessages: pier_extraMessages,
-  } = pier_ctx;
+  const { event: pier_event, env: pier_env, text: pier_text, chatId: pier_chatId, isGroupOrRoom: pier_isGroupOrRoom, extraMessages: pier_extraMessages } = pier_ctx;
 
   if (!pier_isGroupOrRoom) {
-    await pier_sendCombinedReply(
-      pier_event.replyToken,
-      pier_extraMessages,
-      [{ type: 'text', text: 'This only works in a group or multi-person chat.' }],
-      pier_chatId,
-      pier_env
-    );
+    await pier_sendCombinedReply(pier_event.replyToken, pier_extraMessages, [{ type: 'text', text: 'This only works in a group or multi-person chat.' }], pier_chatId, pier_env);
     return;
   }
   if (!pier_env.BOT_KV) {
-    await pier_sendCombinedReply(
-      pier_event.replyToken,
-      pier_extraMessages,
-      [{ type: 'text', text: 'KV storage is not configured, cannot save this.' }],
-      pier_chatId,
-      pier_env
-    );
+    await pier_sendCombinedReply(pier_event.replyToken, pier_extraMessages, [{ type: 'text', text: 'KV storage is not configured, cannot save this.' }], pier_chatId, pier_env);
     return;
   }
 
@@ -68,22 +49,10 @@ export async function pier_handle(pier_ctx) {
       // Shouldn't normally happen — recordMessage already adds this
       // member on their first message, including this one — but handle
       // it defensively just in case.
-      pier_members.push({
-        userId: pier_event.source.userId,
-        displayName: 'Unknown',
-        messageCount: 1,
-        totalMessageCount: 1,
-        birthday: pier_birthday,
-      });
+      pier_members.push({ userId: pier_event.source.userId, displayName: 'Unknown', messageCount: 1, totalMessageCount: 1, birthday: pier_birthday });
     }
     return pier_members;
   });
 
-  await pier_sendCombinedReply(
-    pier_event.replyToken,
-    pier_extraMessages,
-    [{ type: 'text', text: `Your birthday is set to ${pier_birthday} 🎂` }],
-    pier_chatId,
-    pier_env
-  );
+  await pier_sendCombinedReply(pier_event.replyToken, pier_extraMessages, [{ type: 'text', text: `Your birthday is set to ${pier_birthday} 🎂` }], pier_chatId, pier_env);
 }

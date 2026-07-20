@@ -164,7 +164,9 @@ export async function pier_trackKnownMember(pier_env, pier_chatId, pier_userId) 
 export async function pier_untrackKnownMember(pier_env, pier_chatId, pier_userId) {
   if (!pier_env.BOT_KV || !pier_chatId || !pier_userId) return;
   try {
-    await pier_withKnownMembersLock(pier_env, pier_chatId, (pier_members) => pier_members.filter((m) => m.userId !== pier_userId));
+    await pier_withKnownMembersLock(pier_env, pier_chatId, (pier_members) =>
+      pier_members.filter((m) => m.userId !== pier_userId)
+    );
   } catch (pier_err) {
     console.error('pier_untrackKnownMember failed:', pier_err);
   }

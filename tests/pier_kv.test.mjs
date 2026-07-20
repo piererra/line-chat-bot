@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pier_scopedKey, pier_getChatId, pier_parseKnownMembers, pier_levelForCount } from '../src/lib/pier_kv.js';
+import {
+  pier_scopedKey,
+  pier_getChatId,
+  pier_parseKnownMembers,
+  pier_levelForCount,
+} from '../src/lib/pier_kv.js';
 
 test('pier_scopedKey namespaces a base key by chat id', () => {
   assert.equal(pier_scopedKey('welcome_message', 'g1'), 'welcome_message:g1');

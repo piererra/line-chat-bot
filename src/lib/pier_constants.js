@@ -11,13 +11,20 @@ export const pier_LINE_API = 'https://api.line.me/v2/bot';
 export const pier_BOT_VERSION = '2026-07-19l';
 
 export const pier_DEFAULT_WELCOME_TEMPLATE =
-  '━━━━━━━━━━━━━━━━━━━━━\n' + '✨ WELCOME TO IMPERI신L ✨\n' + '━━━━━━━━━━━━━━━━━━━━━\n' + 'Hi {mention} 🌟✨! 🎉\n' + 'Semoga betah ❤️';
+  '━━━━━━━━━━━━━━━━━━━━━\n' +
+  '✨ WELCOME TO IMPERI신L ✨\n' +
+  '━━━━━━━━━━━━━━━━━━━━━\n' +
+  'Hi {mention} 🌟✨! 🎉\n' +
+  'Semoga betah ❤️';
 
 // Leave messages use a {name} placeholder (plain text) rather than
 // {mention} — by the time a memberLeft event fires, that person is no
 // longer a group member, so a mention tag can't reliably resolve/render.
 export const pier_DEFAULT_LEAVE_TEMPLATE =
-  '━━━━━━━━━━━━━━━━━━━━━\n' + '👋 Selamat jalan, {name}\n' + '━━━━━━━━━━━━━━━━━━━━━\n' + 'Semoga sukses selalu di manapun berada ✨';
+  '━━━━━━━━━━━━━━━━━━━━━\n' +
+  '👋 Selamat jalan, {name}\n' +
+  '━━━━━━━━━━━━━━━━━━━━━\n' +
+  'Semoga sukses selalu di manapun berada ✨';
 
 // "Sider" caller-out — a gag feature, NOT real read-receipt detection.
 // LINE's Messaging API gives bots no signal about who has read a message,
@@ -34,6 +41,25 @@ export const pier_SIDER_PHRASES = [
   '{mention} jangan jadi sider mulu dong, muncul napa!',
   '{mention} kabur pas ditandain 🏃💨',
   '{mention} online tuh, jangan diem aja~',
+  '{mention} kelihatan lho abis buka chat ini 👁️',
+  '{mention} udah lama scroll doang, komen dikit napa 😌',
+  '{mention} kok senyap terus dari tadi?',
+  '{mention} tau tau muncul pas ditag doang 🤭',
+  '{mention} sini join, jangan cuma mantengin layar',
+  '{mention} kerasa banget lagi merhatiin dari belakang layar',
+  '{mention} ish, ketauan online tapi ga bales 😤',
+  '{mention} lurking terus nih dari tadi',
+  '{mention} keliatan centang birunya, giliran bales ilang 👻',
+  '{mention} main kucing kucingan ya sama chat ini',
+  '{mention} udah dibaca kan? jawab dong~',
+  '{mention} auto muncul kalo namanya disebut doang 😂',
+  '{mention} kayanya lagi ngintip nih dari tadi',
+  '{mention} jangan modus jadi silent reader terus',
+  '{mention} eh ketangkep basah lagi baca chat 📸',
+  '{mention} standby terus tapi ga pernah nyapa',
+  '{mention} kelamaan diem, kirain HP nya ilang',
+  '{mention} udah ketauan online dari tadi, jangan pura-pura sibuk',
+  '{mention} sesekali komen dong, jangan jadi hantu grup 👻',
 ];
 
 // Leveling — based on totalMessageCount, which (unlike the weekly

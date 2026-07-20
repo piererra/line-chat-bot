@@ -20,8 +20,7 @@ export async function pier_handle(pier_ctx) {
     return [
       {
         type: 'text',
-        text:
-          'No groups tracked yet. The bot auto-tracks a group the ' +
+        text: 'No groups tracked yet. The bot auto-tracks a group the ' +
           'moment it sees any activity there (a join, or anyone sending ' +
           'a message).',
       },

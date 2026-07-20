@@ -11,11 +11,5 @@ export function pier_matches(pier_text) {
 export async function pier_handle(pier_ctx) {
   const { event: pier_event, env: pier_env, chatId: pier_chatId, extraMessages: pier_extraMessages } = pier_ctx;
   if (!(await pier_isWhoamiEnabled(pier_env))) return; // disabled bot-wide, stay quiet
-  await pier_sendCombinedReply(
-    pier_event.replyToken,
-    pier_extraMessages,
-    [{ type: 'text', text: `Your userId:\n${pier_event.source.userId}` }],
-    pier_chatId,
-    pier_env
-  );
+  await pier_sendCombinedReply(pier_event.replyToken, pier_extraMessages, [{ type: 'text', text: `Your userId:\n${pier_event.source.userId}` }], pier_chatId, pier_env);
 }

@@ -20,9 +20,13 @@ export async function pier_verifySignature(pier_rawBody, pier_signatureHeader, p
   if (!pier_channelSecret || !pier_signatureHeader) return false;
 
   const pier_enc = new TextEncoder();
-  const pier_key = await crypto.subtle.importKey('raw', pier_enc.encode(pier_channelSecret), { name: 'HMAC', hash: 'SHA-256' }, false, [
-    'sign',
-  ]);
+  const pier_key = await crypto.subtle.importKey(
+    'raw',
+    pier_enc.encode(pier_channelSecret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
   const pier_sigBuffer = await crypto.subtle.sign('HMAC', pier_key, pier_enc.encode(pier_rawBody));
   const pier_computed = btoa(String.fromCharCode(...new Uint8Array(pier_sigBuffer)));
 
