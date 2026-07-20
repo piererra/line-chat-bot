@@ -32,7 +32,7 @@ export async function pier_handleWebhook(pier_request, pier_env, pier_ctx) {
   // Handle events sequentially so replies go out before we return 200.
   for (const pier_event of pier_events) {
     try {
-      if (await pier_isDuplicateEvent(pier_env, pier_event)) {
+      if (await pier_isDuplicateEvent(pier_env, pier_event, pier_ctx)) {
         console.log('Skipping duplicate webhook event:', pier_event.webhookEventId);
         continue;
       }
@@ -45,12 +45,17 @@ export async function pier_handleWebhook(pier_request, pier_env, pier_ctx) {
   return new Response('OK', { status: 200 });
 }
 
-async function pier_isDuplicateEvent(pier_env, pier_event) {
+async function pier_isDuplicateEvent(pier_env, pier_event, pier_execCtx) {
   if (!pier_env.BOT_KV || !pier_event.webhookEventId) return false;
   const pier_key = `dedup:${pier_event.webhookEventId}`;
   const pier_seen = await pier_env.BOT_KV.get(pier_key);
   if (pier_seen) return true;
-  await pier_env.BOT_KV.put(pier_key, '1', { expirationTtl: pier_DEDUP_TTL_SECONDS });
+  const pier_markSeen = pier_env.BOT_KV.put(pier_key, '1', { expirationTtl: pier_DEDUP_TTL_SECONDS });
+  if (pier_execCtx?.waitUntil) {
+    pier_execCtx.waitUntil(pier_markSeen);
+  } else {
+    await pier_markSeen;
+  }
   return false;
 }
 
@@ -126,9 +131,22 @@ async function pier_handleTextMessage(pier_event, pier_env) {
   // Auto-track this group/room on any activity, not just the 'join' event —
   // covers groups the bot was added to before tracking existed, with no
   // manual step needed. pier_addKnownGroup() no-ops if it's already tracked.
+  //
+  // These three checks touch independent KV keys (known_groups,
+  // known_members:<chatId>, unsend_enabled:<chatId>) with no data
+  // dependency between them, so they run concurrently — this used to run
+  // as three sequential round trips on every single message, in every
+  // group, regardless of which command (if any) was being run, adding
+  // baseline latency ahead of every reply, public commands included.
+  let pier_leveledUp = null;
   if (pier_isGroupOrRoom) {
-    await pier_addKnownGroup(pier_env, pier_chatId, pier_event.source.type);
-    const pier_leveledUp = await pier_recordMessage(pier_env, pier_chatId, pier_event.source.userId);
+    const [, pier_leveledUpResult, pier_unsendEnabled] = await Promise.all([
+      pier_addKnownGroup(pier_env, pier_chatId, pier_event.source.type),
+      pier_recordMessage(pier_env, pier_chatId, pier_event.source.userId),
+      pier_env.BOT_KV ? pier_env.BOT_KV.get(pier_scopedKey('unsend_enabled', pier_chatId)) : Promise.resolve(null),
+    ]);
+    pier_leveledUp = pier_leveledUpResult;
+
     if (pier_leveledUp) {
       // Per-group toggle, default ON — -levelup off disables it.
       const pier_enabled = (await pier_env.BOT_KV.get(pier_scopedKey('levelup_enabled', pier_chatId))) !== '0';
@@ -146,15 +164,12 @@ async function pier_handleTextMessage(pier_event, pier_env) {
     // most groups won't want it. TTL slightly exceeds LINE's 24h unsend
     // window so a message is never missing from cache when its unsend
     // event actually arrives.
-    if (pier_env.BOT_KV) {
-      const pier_unsendEnabled = (await pier_env.BOT_KV.get(pier_scopedKey('unsend_enabled', pier_chatId))) === '1';
-      if (pier_unsendEnabled) {
-        await pier_env.BOT_KV.put(
-          `unsend_cache:${pier_event.message.id}`,
-          JSON.stringify({ userId: pier_event.source.userId, text: pier_event.message.text }),
-          { expirationTtl: 90000 }
-        );
-      }
+    if (pier_unsendEnabled === '1') {
+      await pier_env.BOT_KV.put(
+        `unsend_cache:${pier_event.message.id}`,
+        JSON.stringify({ userId: pier_event.source.userId, text: pier_event.message.text }),
+        { expirationTtl: 90000 }
+      );
     }
   }
 
