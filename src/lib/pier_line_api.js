@@ -82,6 +82,24 @@ export async function pier_getGroupMemberProfile(pier_chatId, pier_userId, pier_
   }
 }
 
+// 1:1 friend profile — distinct endpoint from the group-scoped member
+// profile above. Only works for someone who has added the bot as a
+// friend (which anyone DMing the bot necessarily has). Used by the
+// admin-passphrase trigger, which only fires in 1:1 chats where there's
+// no group to scope a member lookup to.
+export async function pier_getUserProfile(pier_userId, pier_env) {
+  try {
+    const pier_res = await pier_fetchWithTimeout(`${pier_LINE_API}/profile/${pier_userId}`, {
+      headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
+    });
+    if (!pier_res.ok) return null;
+    return await pier_res.json(); // { userId, displayName, pictureUrl }
+  } catch (pier_err) {
+    console.error('pier_getUserProfile failed or timed out:', pier_err);
+    return null;
+  }
+}
+
 // Group Summary API only works for groups (not multi-person rooms — those
 // have no name in LINE at all), and only while the bot is still a member.
 // Returns null on any failure so callers can fall back to showing the id.

@@ -19,6 +19,9 @@ import * as pier_levelupToggle from './admin/pier_levelup_toggle.js';
 import * as pier_unsendToggle from './admin/pier_unsend_toggle.js';
 import * as pier_status from './admin/pier_status.js';
 import * as pier_groups from './admin/pier_groups.js';
+import * as pier_adminlist from './admin/pier_adminlist.js';
+import * as pier_adminremove from './admin/pier_adminremove.js';
+import * as pier_setadminpass from './admin/pier_setadminpass.js';
 
 // Public ('!' prefix) commands — open to everyone, no admin gate. Each
 // handler sends its own reply and the dispatcher returns immediately
@@ -39,4 +42,7 @@ export const pier_adminCommands = [
   pier_unsendToggle,
   pier_status,
   pier_groups,
+  pier_adminlist,
+  pier_adminremove,
+  pier_setadminpass,
 ];

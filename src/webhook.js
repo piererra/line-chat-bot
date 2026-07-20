@@ -13,6 +13,7 @@ import { pier_handleMemberJoined } from './events/pier_member_joined.js';
 import { pier_handleMemberLeft } from './events/pier_member_left.js';
 import { pier_handleUnsendEvent } from './events/pier_unsend.js';
 import { pier_handleStickerMessage, pier_matchStickerTrigger } from './events/pier_sticker_trigger.js';
+import { pier_tryAdminPassphraseTrigger } from './events/pier_admin_passphrase.js';
 
 import { pier_publicCommands, pier_adminCommands } from './commands/pier_registry.js';
 import * as pier_whoamiToggle from './commands/admin/pier_whoami_toggle.js';
@@ -121,6 +122,16 @@ async function pier_handleTextMessage(pier_event, pier_env) {
   const pier_text = pier_event.message.text.trim();
   const pier_isGroupOrRoom = pier_event.source.type === 'group' || pier_event.source.type === 'room';
   const pier_chatId = pier_getChatId(pier_event.source);
+
+  // DM-only admin self-add trigger — checked first, before anything else,
+  // since it's a plain-text match rather than a "-" command (see that
+  // file for why). No-ops immediately for any non-DM chat or non-matching
+  // text, so this is a cheap check for the overwhelming majority of
+  // messages.
+  if (!pier_isGroupOrRoom) {
+    const pier_triggered = await pier_tryAdminPassphraseTrigger(pier_event, pier_env);
+    if (pier_triggered) return;
+  }
 
   // Messages that would otherwise cost quota (level-up congrats, sider
   // callouts) get folded into this event's reply instead, since reply

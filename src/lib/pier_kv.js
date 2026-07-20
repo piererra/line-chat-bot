@@ -263,3 +263,69 @@ export async function pier_getStickerTriggers(pier_env) {
     return {};
   }
 }
+
+// ---------------------------------------------------------------------
+// Admin passphrase + self-added admins — a DM-only, deliberately
+// undocumented way for the owner to grant admin status to someone
+// without going through OWNER_USER_ID. See events/pier_admin_passphrase.js
+// for the trigger logic; this just owns the KV reads/writes. Both keys
+// are bot-wide (unscoped), matching how OWNER_USER_ID admin status is
+// also bot-wide, not per-group.
+// ---------------------------------------------------------------------
+
+const pier_ADMIN_PASSPHRASE_KEY = 'admin_passphrase';
+const pier_SELF_ADMINS_KEY = 'self_admins';
+
+export async function pier_getAdminPassphrase(pier_env) {
+  if (!pier_env.BOT_KV) return null;
+  return pier_env.BOT_KV.get(pier_ADMIN_PASSPHRASE_KEY);
+}
+
+export async function pier_setAdminPassphrase(pier_env, pier_phrase) {
+  if (!pier_env.BOT_KV) return;
+  await pier_env.BOT_KV.put(pier_ADMIN_PASSPHRASE_KEY, pier_phrase);
+}
+
+// Auto-disables after one successful use — see pier_admin_passphrase.js,
+// which calls this the moment any match (even a redundant one from an
+// already-admin sender) is found, so the window an active phrase is
+// usable stays as short as possible.
+export async function pier_clearAdminPassphrase(pier_env) {
+  if (!pier_env.BOT_KV) return;
+  await pier_env.BOT_KV.delete(pier_ADMIN_PASSPHRASE_KEY);
+}
+
+export async function pier_getSelfAdmins(pier_env) {
+  if (!pier_env.BOT_KV) return [];
+  try {
+    const pier_raw = await pier_env.BOT_KV.get(pier_SELF_ADMINS_KEY);
+    const pier_parsed = pier_raw ? JSON.parse(pier_raw) : [];
+    return Array.isArray(pier_parsed) ? pier_parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function pier_isSelfAdmin(pier_env, pier_userId) {
+  const pier_admins = await pier_getSelfAdmins(pier_env);
+  return pier_admins.some((a) => a.userId === pier_userId);
+}
+
+export async function pier_addSelfAdmin(pier_env, pier_admin) {
+  if (!pier_env.BOT_KV) return;
+  const pier_admins = await pier_getSelfAdmins(pier_env);
+  if (pier_admins.some((a) => a.userId === pier_admin.userId)) return; // already admin, no duplicate entry
+  pier_admins.push(pier_admin);
+  await pier_env.BOT_KV.put(pier_SELF_ADMINS_KEY, JSON.stringify(pier_admins));
+}
+
+// Returns the removed entry (or null if the index was out of range) so
+// -adminremove can confirm who it removed by name.
+export async function pier_removeSelfAdminAt(pier_env, pier_index) {
+  if (!pier_env.BOT_KV) return null;
+  const pier_admins = await pier_getSelfAdmins(pier_env);
+  if (pier_index < 0 || pier_index >= pier_admins.length) return null;
+  const [pier_removed] = pier_admins.splice(pier_index, 1);
+  await pier_env.BOT_KV.put(pier_SELF_ADMINS_KEY, JSON.stringify(pier_admins));
+  return pier_removed;
+}
