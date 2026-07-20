@@ -17,7 +17,7 @@ export function pier_matches(pier_text) {
 // where an unauthorized "-whoami on/off" never falls through to be
 // treated as an unrecognized "-" command.
 export async function pier_handle(pier_ctx) {
-  const { event: pier_event, env: pier_env, text: pier_text, chatId: pier_chatId, isGroupOrRoom: pier_isGroupOrRoom, extraMessages: pier_extraMessages } = pier_ctx;
+  const { event: pier_event, env: pier_env, text: pier_text, chatId: pier_chatId, extraMessages: pier_extraMessages } = pier_ctx;
 
   if (!pier_getOwnerUserIds(pier_env).includes(pier_event.source.userId)) {
     // Not the owner — stay silent, same as any unrecognized message.

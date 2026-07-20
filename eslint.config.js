@@ -1,6 +1,6 @@
 // Flat config (ESLint v9+). No extra `globals` package dependency —
-// Workers runtime globals are declared by hand below, since this bot
-// only needs a handful of them.
+// runtime globals are declared by hand below, since this bot only needs
+// a handful of them.
 export default [
   {
     ignores: ['node_modules/**'],
@@ -11,7 +11,11 @@ export default [
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
-        // Cloudflare Workers runtime (browser-like, not Node)
+        // Cloudflare Workers runtime (browser-like, not Node) — src/ code
+        // runs here, and genuinely has no `global`/`process`/etc., so
+        // those stay out of this shared block deliberately: using them
+        // in src/ would be a real bug, and no-undef should keep catching
+        // that.
         fetch: 'readonly',
         Request: 'readonly',
         Response: 'readonly',
@@ -25,9 +29,6 @@ export default [
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         AbortController: 'readonly',
-        // Node (test files only, via tests/**.test.mjs override below, but
-        // declared globally too since it's harmless for the rest)
-        process: 'readonly',
       },
     },
     rules: {
@@ -37,6 +38,18 @@ export default [
       'prefer-const': 'warn',
       eqeqeq: ['warn', 'smart'],
       'no-console': 'off', // this bot deliberately logs failures for Cloudflare's real-time log viewer
+    },
+  },
+  {
+    // tests/ runs under Node (via `node --test`), not the Workers
+    // runtime — `global` is how the mocked fetch gets installed
+    // (`global.fetch = ...`), and `process` is occasionally useful too.
+    files: ['tests/**/*.js', 'tests/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        global: 'writable',
+        process: 'readonly',
+      },
     },
   },
 ];
