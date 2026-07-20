@@ -64,7 +64,54 @@ same hosting pattern as the Discord bot.
   header/footer bars), so menus, lists, and status messages all look
   tidy and uniform
 
-## Commands
+## Project structure
+
+The bot is split one file per concern rather than one large `index.js`.
+Every file, exported function, and internal variable is prefixed `pier_`
+throughout — that's a deliberate authorship signature, not a naming
+convention forced by anything technical.
+
+```
+src/
+  index.js              # entry point — fetch() and scheduled() handlers
+  webhook.js             # signature verification, dedup, event-type
+                          # dispatch, and the text-command pipeline
+  lib/                    # shared helpers, no command-specific logic
+    pier_constants.js      # shared constant values (templates, timeouts, keys)
+    pier_time.js            # WIB date/time helpers
+    pier_security.js        # webhook signature verification
+    pier_line_api.js        # LINE Messaging API HTTP wrappers
+    pier_kv.js               # KV-backed state (groups, members, settings)
+    pier_format.js           # text/message formatting helpers
+    pier_auth.js              # bot-admin / owner checks, !whoami toggle
+    pier_sider.js              # "sider" callout gag feature
+  events/                  # non-command webhook event handlers
+    pier_member_joined.js
+    pier_member_left.js
+    pier_unsend.js
+    pier_sticker_trigger.js
+  scheduled/                # the daily cron job
+    pier_daily_tasks.js       # birthdays + leaderboard reset/post
+  commands/
+    pier_registry.js          # maps command modules for the dispatcher
+    public/                   # `!` commands — open to everyone
+      pier_whoami.js, pier_leaderboard.js, pier_setbirthday.js,
+      pier_picture.js, pier_help.js
+    admin/                    # `-` commands — gated by isBotAdmin
+      pier_whoami_toggle.js, pier_help.js, pier_testwelcome.js,
+      pier_testleavemsg.js, pier_setleavemsg.js, pier_setwelcome.js,
+      pier_sider_toggle.js, pier_levelup_toggle.js, pier_unsend_toggle.js,
+      pier_status.js, pier_groups.js
+tests/                    # see **Testing** below
+```
+
+Each command module exports `pier_matches(text)` and `pier_handle(ctx)` —
+`webhook.js` loops through `commands/pier_registry.js` in order and calls
+the first one that matches. Shared helpers in `lib/` have no knowledge of
+any specific command; commands import from `lib/` and `events/`, never
+the other way around.
+
+
 
 Commands split by prefix: `-` is admin-only (gated by the bot-admin
 system below), `!` is open to everyone. `-help` lists the admin
@@ -132,8 +179,10 @@ worker directly (Settings → Variables and Secrets).
 1. Create a **KV namespace** (Workers & Pages → KV → Create) and paste
    its id into `wrangler.toml` under `kv_namespaces` (binding must stay
    `BOT_KV` to match the code).
-2. Connect this GitHub repo under Workers & Pages → Create → Connect to
-   Git, so pushes auto-deploy.
+2. Connect this GitHub repo under Workers & Pages → this worker →
+   Settings → Builds, so pushes to `main` auto-deploy. (GitHub Actions
+   only runs tests/lint for this repo — see **CI/CD** below — deploys are
+   handled by Cloudflare's own integration, not duplicated in Actions.)
 3. Set these as environment variables / secrets on the worker (Settings
    → Variables and Secrets):
 
@@ -219,6 +268,59 @@ Token** instead:
 `credential.helper store` (set above) saves it after that first push,
 so future pushes don't ask again. Once pushed, Cloudflare picks up the
 new commit and redeploys automatically — nothing else to run.
+
+## Testing
+
+Tests use Node's built-in test runner (`node:test`) — no test framework
+dependency to install or go stale.
+
+```bash
+npm install   # only needed once, or after devDependencies change
+npm test
+```
+
+`tests/` mirrors `src/`: `pier_kv.test.mjs`, `pier_format.test.mjs`,
+`pier_security.test.mjs`, and `pier_time.test.mjs` unit-test the pure
+helper functions in `lib/`; `pier_webhook.test.mjs` is an integration
+suite that sends signed, mocked LINE webhook payloads through the real
+`pier_handleWebhook()` pipeline and asserts on what would have actually
+been sent back to LINE (admin gating, the owner-only `-whoami` toggle,
+webhook dedup, `!setbirthday` validation, etc.) — the same kind of check
+used by hand throughout this project's early debugging, now permanent
+and repeatable instead of a one-off script.
+
+Add a new test alongside the file it covers when adding a command or
+lib function — `tests/pier_test_helpers.mjs` has the shared mock KV and
+signed-request builder so new integration tests don't need to
+reimplement them.
+
+## Linting & formatting
+
+```bash
+npm run lint           # ESLint — catches typos like a wrong env var name
+                        # before they ever reach production
+npm run format          # Prettier — auto-fixes style
+npm run format:check    # Prettier — check only, no changes (used by CI)
+```
+
+`eslint.config.js` declares the handful of Workers runtime globals this
+bot actually uses (`fetch`, `crypto`, `Response`, etc.) by hand, rather
+than pulling in the `globals` package for that alone.
+
+## CI/CD
+
+`.github/workflows/ci.yml` runs on every push and pull request against
+`main`: `npm test`, `npm run lint`, and `npm run format:check`.
+
+Deploys are **not** handled by this workflow — this repo already has
+Cloudflare's own native Git integration connected (Workers & Pages →
+this worker → Settings → Builds), which redeploys on every push to
+`main` on its own. Running a second, separate deploy from GitHub Actions
+on top of that would deploy the same push twice, so Actions here is
+scoped to tests/lint only. If that native integration is ever
+disconnected, deploying goes back to running `npm run deploy` by hand
+(or a deploy job can be added back to `ci.yml` — see this project's
+history for a working version of that job).
 
 ## Notes
 

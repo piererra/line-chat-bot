@@ -2,13 +2,20 @@
   "name": "line-chat-bot",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "LINE Messaging API bot for the group chat — welcomes new members, replies to commands, and tracks known groups.",
   "main": "src/index.js",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test": "node --test tests/*.test.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "wrangler": "^3.90.0"
+    "wrangler": "^3.90.0",
+    "eslint": "^9.9.0",
+    "prettier": "^3.3.3"
   }
 }
