@@ -68,8 +68,10 @@ export const pier_DEDUP_TTL_SECONDS = 24 * 60 * 60; // comfortably longer than L
 // ~1.98-1.99s wall time. Once that happens the whole Worker invocation is
 // killed, including whatever reply was about to go out. -status and
 // -groups each make extra live calls to LINE's own API (quota checks,
-// per-group member count + summary) before replying, which occasionally
-// pushes total latency past that window. Every such call is capped at
-// this timeout so a single slow hop degrades to "unavailable" in the
-// reply instead of risking the whole reply.
-export const pier_EXTERNAL_FETCH_TIMEOUT_MS = 1200;
+// per-group member count + summary) before replying — capping each one
+// at 1.2s still left too little headroom once the final (unbounded)
+// reply POST and normal network jitter are added on top, so this stays
+// well under half of LINE's budget, leaving margin for everything after
+// it. A single slow hop degrades to "unavailable" in the reply instead
+// of risking the whole reply being canceled.
+export const pier_EXTERNAL_FETCH_TIMEOUT_MS = 600;

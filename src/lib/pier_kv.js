@@ -32,7 +32,7 @@ export async function pier_checkKvHealth(pier_env) {
     // reachable; write capability is already proven continuously by every
     // other command this bot handles (dedup markers, known_members, etc.),
     // so it doesn't need re-proving here on every -status call too.
-    const pier_timeout = new Promise((resolve) => setTimeout(() => resolve('timeout'), 800));
+    const pier_timeout = new Promise((resolve) => setTimeout(() => resolve('timeout'), 500));
     const pier_result = await Promise.race([pier_env.BOT_KV.get('meta:status_check'), pier_timeout]);
     return pier_result !== 'timeout';
   } catch {

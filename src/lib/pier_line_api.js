@@ -70,11 +70,16 @@ export async function pier_sendCombinedReply(pier_replyToken, pier_extraMessages
 }
 
 export async function pier_getGroupMemberProfile(pier_chatId, pier_userId, pier_env) {
-  const pier_res = await fetch(`${pier_LINE_API}/group/${pier_chatId}/member/${pier_userId}`, {
-    headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
-  });
-  if (!pier_res.ok) return null;
-  return pier_res.json(); // { userId, displayName, pictureUrl }
+  try {
+    const pier_res = await pier_fetchWithTimeout(`${pier_LINE_API}/group/${pier_chatId}/member/${pier_userId}`, {
+      headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
+    });
+    if (!pier_res.ok) return null;
+    return await pier_res.json(); // { userId, displayName, pictureUrl }
+  } catch (pier_err) {
+    console.error('pier_getGroupMemberProfile failed or timed out:', pier_err);
+    return null;
+  }
 }
 
 // Group Summary API only works for groups (not multi-person rooms — those
