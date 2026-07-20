@@ -25,11 +25,16 @@ export function pier_getChatId(pier_source) {
 export async function pier_checkKvHealth(pier_env) {
   if (!pier_env.BOT_KV) return false;
   try {
-    const pier_key = 'meta:status_check';
-    const pier_value = String(Date.now());
-    await pier_env.BOT_KV.put(pier_key, pier_value);
-    const pier_readBack = await pier_env.BOT_KV.get(pier_key);
-    return pier_readBack === pier_value;
+    // A write+read round trip used to live here to prove both read and
+    // write worked — but that's two sequential KV calls with no bound on
+    // either, run before -status even starts on the (now timeout-capped)
+    // quota calls. A single bounded read is enough to prove KV is
+    // reachable; write capability is already proven continuously by every
+    // other command this bot handles (dedup markers, known_members, etc.),
+    // so it doesn't need re-proving here on every -status call too.
+    const pier_timeout = new Promise((resolve) => setTimeout(() => resolve('timeout'), 800));
+    const pier_result = await Promise.race([pier_env.BOT_KV.get('meta:status_check'), pier_timeout]);
+    return pier_result !== 'timeout';
   } catch {
     return false;
   }

@@ -12,8 +12,11 @@ export function pier_matches(pier_text) {
 export async function pier_handle(pier_ctx) {
   const { env: pier_env } = pier_ctx;
 
-  const pier_kvOk = await pier_checkKvHealth(pier_env);
-  const [pier_quota, pier_consumption] = await Promise.all([pier_getMessageQuota(pier_env), pier_getMessageQuotaConsumption(pier_env)]);
+  const [pier_kvOk, pier_quota, pier_consumption] = await Promise.all([
+    pier_checkKvHealth(pier_env),
+    pier_getMessageQuota(pier_env),
+    pier_getMessageQuotaConsumption(pier_env),
+  ]);
 
   let pier_quotaLine;
   if (!pier_quota) {
