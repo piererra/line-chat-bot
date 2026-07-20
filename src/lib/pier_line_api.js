@@ -1,6 +1,21 @@
 // Thin wrappers around the LINE Messaging API HTTP endpoints.
 
-import { pier_LINE_API } from './pier_constants.js';
+import { pier_LINE_API, pier_EXTERNAL_FETCH_TIMEOUT_MS } from './pier_constants.js';
+
+// Bounds a fetch to at most pier_EXTERNAL_FETCH_TIMEOUT_MS — used only for
+// the "nice to have" enrichment calls (quota, member count, group summary)
+// that aren't essential to getting a reply out. Aborts and lets the
+// caller's existing null-on-failure handling take over rather than let one
+// slow hop risk the whole reply being canceled by LINE's own timeout.
+async function pier_fetchWithTimeout(pier_url, pier_options, pier_timeoutMs = pier_EXTERNAL_FETCH_TIMEOUT_MS) {
+  const pier_controller = new AbortController();
+  const pier_timer = setTimeout(() => pier_controller.abort(), pier_timeoutMs);
+  try {
+    return await fetch(pier_url, { ...pier_options, signal: pier_controller.signal });
+  } finally {
+    clearTimeout(pier_timer);
+  }
+}
 
 // Both send functions used to fire-and-forget the fetch — a bad token, an
 // oversized message, or any other LINE API rejection failed completely
@@ -66,11 +81,16 @@ export async function pier_getGroupMemberProfile(pier_chatId, pier_userId, pier_
 // have no name in LINE at all), and only while the bot is still a member.
 // Returns null on any failure so callers can fall back to showing the id.
 export async function pier_getGroupSummary(pier_chatId, pier_env) {
-  const pier_res = await fetch(`${pier_LINE_API}/group/${pier_chatId}/summary`, {
-    headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
-  });
-  if (!pier_res.ok) return null;
-  return pier_res.json(); // { groupId, groupName, pictureUrl }
+  try {
+    const pier_res = await pier_fetchWithTimeout(`${pier_LINE_API}/group/${pier_chatId}/summary`, {
+      headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
+    });
+    if (!pier_res.ok) return null;
+    return await pier_res.json(); // { groupId, groupName, pictureUrl }
+  } catch (pier_err) {
+    console.error('pier_getGroupSummary failed or timed out:', pier_err);
+    return null;
+  }
 }
 
 // Live member headcount straight from LINE — separate endpoints for
@@ -78,12 +98,17 @@ export async function pier_getGroupSummary(pier_chatId, pier_env) {
 // can fall back gracefully.
 export async function pier_getMemberCount(pier_chatId, pier_chatType, pier_env) {
   const pier_kind = pier_chatType === 'room' ? 'room' : 'group';
-  const pier_res = await fetch(`${pier_LINE_API}/${pier_kind}/${pier_chatId}/members/count`, {
-    headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
-  });
-  if (!pier_res.ok) return null;
-  const pier_data = await pier_res.json(); // { count }
-  return typeof pier_data.count === 'number' ? pier_data.count : null;
+  try {
+    const pier_res = await pier_fetchWithTimeout(`${pier_LINE_API}/${pier_kind}/${pier_chatId}/members/count`, {
+      headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
+    });
+    if (!pier_res.ok) return null;
+    const pier_data = await pier_res.json(); // { count }
+    return typeof pier_data.count === 'number' ? pier_data.count : null;
+  } catch (pier_err) {
+    console.error('pier_getMemberCount failed or timed out:', pier_err);
+    return null;
+  }
 }
 
 // Monthly message quota — the configured target limit and how much of it
@@ -92,26 +117,26 @@ export async function pier_getMemberCount(pier_chatId, pier_chatType, pier_env) 
 // -status can show "unavailable" instead of crashing.
 export async function pier_getMessageQuota(pier_env) {
   try {
-    const pier_res = await fetch(`${pier_LINE_API}/message/quota`, {
+    const pier_res = await pier_fetchWithTimeout(`${pier_LINE_API}/message/quota`, {
       headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
     });
     if (!pier_res.ok) return null;
     return await pier_res.json(); // { type: 'limited' | 'none', value? }
   } catch (pier_err) {
-    console.error('pier_getMessageQuota failed:', pier_err);
+    console.error('pier_getMessageQuota failed or timed out:', pier_err);
     return null;
   }
 }
 
 export async function pier_getMessageQuotaConsumption(pier_env) {
   try {
-    const pier_res = await fetch(`${pier_LINE_API}/message/quota/consumption`, {
+    const pier_res = await pier_fetchWithTimeout(`${pier_LINE_API}/message/quota/consumption`, {
       headers: { Authorization: `Bearer ${pier_env.LINE_CHANNEL_ACCESS_TOKEN}` },
     });
     if (!pier_res.ok) return null;
     return await pier_res.json(); // { totalUsage }
   } catch (pier_err) {
-    console.error('pier_getMessageQuotaConsumption failed:', pier_err);
+    console.error('pier_getMessageQuotaConsumption failed or timed out:', pier_err);
     return null;
   }
 }
@@ -121,10 +146,16 @@ export async function pier_getMessageQuotaConsumption(pier_env) {
 // alongside the name so drift against the KV-tracked known_members list
 // is easy to spot.
 export async function pier_describeGroup(pier_g, pier_env) {
-  const pier_count = await pier_getMemberCount(pier_g.chatId, pier_g.type, pier_env);
+  if (pier_g.type !== 'group') {
+    const pier_count = await pier_getMemberCount(pier_g.chatId, pier_g.type, pier_env);
+    const pier_countLabel = pier_count === null ? '' : ` (${pier_count} members)`;
+    return `(multi-person chat, no name — ${pier_g.chatId})${pier_countLabel}`;
+  }
+  const [pier_count, pier_summary] = await Promise.all([
+    pier_getMemberCount(pier_g.chatId, pier_g.type, pier_env),
+    pier_getGroupSummary(pier_g.chatId, pier_env),
+  ]);
   const pier_countLabel = pier_count === null ? '' : ` (${pier_count} members)`;
-  if (pier_g.type !== 'group') return `(multi-person chat, no name — ${pier_g.chatId})${pier_countLabel}`;
-  const pier_summary = await pier_getGroupSummary(pier_g.chatId, pier_env);
   const pier_name = pier_summary ? pier_summary.groupName : `(name unavailable, bot may have left — ${pier_g.chatId})`;
   return `${pier_name}${pier_countLabel}`;
 }

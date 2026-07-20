@@ -61,3 +61,15 @@ export const pier_STICKER_TRIGGERS_KEY = 'sticker_triggers';
 // is enough to recognize and skip a redelivery. Best-effort: if BOT_KV is
 // unavailable, events are processed unconditionally rather than dropped.
 export const pier_DEDUP_TTL_SECONDS = 24 * 60 * 60; // comfortably longer than LINE's redelivery window
+
+// LINE's webhook client appears to give up and disconnect the incoming
+// request around ~2s if the bot hasn't replied yet — observed directly in
+// Cloudflare's real-time logs as "Canceled" invocations landing right at
+// ~1.98-1.99s wall time. Once that happens the whole Worker invocation is
+// killed, including whatever reply was about to go out. -status and
+// -groups each make extra live calls to LINE's own API (quota checks,
+// per-group member count + summary) before replying, which occasionally
+// pushes total latency past that window. Every such call is capped at
+// this timeout so a single slow hop degrades to "unavailable" in the
+// reply instead of risking the whole reply.
+export const pier_EXTERNAL_FETCH_TIMEOUT_MS = 1200;
