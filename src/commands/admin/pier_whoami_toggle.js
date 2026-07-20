@@ -26,7 +26,13 @@ export async function pier_handle(pier_ctx) {
     return 'deny';
   }
   if (!pier_env.BOT_KV) {
-    await pier_sendCombinedReply(pier_event.replyToken, pier_extraMessages, [{ type: 'text', text: 'KV storage is not configured, cannot save this.' }], pier_chatId, pier_env);
+    await pier_sendCombinedReply(
+      pier_event.replyToken,
+      pier_extraMessages,
+      [{ type: 'text', text: 'KV storage is not configured, cannot save this.' }],
+      pier_chatId,
+      pier_env
+    );
     return 'handled';
   }
 

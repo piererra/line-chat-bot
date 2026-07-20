@@ -11,20 +11,13 @@ export const pier_LINE_API = 'https://api.line.me/v2/bot';
 export const pier_BOT_VERSION = '2026-07-19l';
 
 export const pier_DEFAULT_WELCOME_TEMPLATE =
-  '━━━━━━━━━━━━━━━━━━━━━\n' +
-  '✨ WELCOME TO IMPERI신L ✨\n' +
-  '━━━━━━━━━━━━━━━━━━━━━\n' +
-  'Hi {mention} 🌟✨! 🎉\n' +
-  'Semoga betah ❤️';
+  '━━━━━━━━━━━━━━━━━━━━━\n' + '✨ WELCOME TO IMPERI신L ✨\n' + '━━━━━━━━━━━━━━━━━━━━━\n' + 'Hi {mention} 🌟✨! 🎉\n' + 'Semoga betah ❤️';
 
 // Leave messages use a {name} placeholder (plain text) rather than
 // {mention} — by the time a memberLeft event fires, that person is no
 // longer a group member, so a mention tag can't reliably resolve/render.
 export const pier_DEFAULT_LEAVE_TEMPLATE =
-  '━━━━━━━━━━━━━━━━━━━━━\n' +
-  '👋 Selamat jalan, {name}\n' +
-  '━━━━━━━━━━━━━━━━━━━━━\n' +
-  'Semoga sukses selalu di manapun berada ✨';
+  '━━━━━━━━━━━━━━━━━━━━━\n' + '👋 Selamat jalan, {name}\n' + '━━━━━━━━━━━━━━━━━━━━━\n' + 'Semoga sukses selalu di manapun berada ✨';
 
 // "Sider" caller-out — a gag feature, NOT real read-receipt detection.
 // LINE's Messaging API gives bots no signal about who has read a message,

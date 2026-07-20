@@ -41,14 +41,9 @@ export function pier_buildLeaderboardText(pier_members, pier_limit) {
 
   const pier_medals = ['🥇', '🥈', '🥉'];
   const pier_lines = pier_ranked.map(
-    (m, i) =>
-      `${pier_medals[i] || `${i + 1}.`} ${m.displayName} (Lv.${pier_levelForCount(m.totalMessageCount)}) — ${m.messageCount} msgs`
+    (m, i) => `${pier_medals[i] || `${i + 1}.`} ${m.displayName} (Lv.${pier_levelForCount(m.totalMessageCount)}) — ${m.messageCount} msgs`
   );
-  return (
-    `━━━[ Most Active (Top ${pier_ranked.length}) ]━━━\n` +
-    pier_lines.join('\n') +
-    '\n━━━━━━━━━━━━━━━━━━━━━━━━'
-  );
+  return `━━━[ Most Active (Top ${pier_ranked.length}) ]━━━\n` + pier_lines.join('\n') + '\n━━━━━━━━━━━━━━━━━━━━━━━━';
 }
 
 // Resolves the userId of an @-mentioned user in an incoming text message

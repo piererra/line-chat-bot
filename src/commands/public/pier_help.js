@@ -26,7 +26,7 @@ export async function pier_handle(pier_ctx) {
             '  members by message count\n' +
             '➸ !setbirthday MM-DD — set your own\n' +
             '  birthday (e.g. !setbirthday 07-17)\n' +
-            '➸ !picture @name — show a member\'s\n' +
+            "➸ !picture @name — show a member's\n" +
             '  profile picture (groups only)\n' +
             '\n' +
             '(these are open to everyone; ask a\n' +

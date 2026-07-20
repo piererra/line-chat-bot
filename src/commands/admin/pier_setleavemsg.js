@@ -19,7 +19,7 @@ export async function pier_handle(pier_ctx) {
       {
         type: 'text',
         text:
-          "Usage: -setleavemsg <text>, e.g. -setleavemsg Bye {name}, take care!\n" +
+          'Usage: -setleavemsg <text>, e.g. -setleavemsg Bye {name}, take care!\n' +
           "(use {name} where the person's name should go — leave messages use " +
           'plain text, not a tappable mention, since the person has already left)',
       },
