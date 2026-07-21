@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // -status — bot version, KV health, and message quota.
 
 import { pier_BOT_VERSION } from '../../lib/pier_constants.js';

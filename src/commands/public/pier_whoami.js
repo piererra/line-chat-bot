@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // !whoami — shows the sender their own LINE userId. Gated bot-wide by
 // -whoami on/off (owner-only toggle, see commands/admin/pier_whoami_toggle.js).
 

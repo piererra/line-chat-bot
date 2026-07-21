@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { pier_scopedKey, pier_getChatId, pier_parseKnownMembers, pier_levelForCount } from '../src/lib/pier_kv.js';

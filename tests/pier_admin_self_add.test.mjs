@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Integration tests for the DM admin-passphrase trigger and the
 // -adminlist / -adminremove / -setadminpass commands.
 
@@ -144,8 +145,8 @@ test('-adminlist and -adminremove are invisible to a self-added admin (silent, n
   assert.equal(pier_admins.length, 1, 'a self-added admin must not be able to remove anyone');
 });
 
-test('the owner can list and remove self-added admins', async () => {
-  const pier_env = pier_makeEnv();
+test('the owner can list and remove self-added admins — but only inside LINE_GROUP_ID', async () => {
+  const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'g1' });
   await pier_env.BOT_KV.put(
     'self_admins',
     JSON.stringify([
@@ -171,8 +172,22 @@ test('the owner can list and remove self-added admins', async () => {
   assert.equal(pier_remaining[0].userId, 'U_b');
 });
 
-test('-setadminpass is owner-only and never echoes the phrase back', async () => {
-  const pier_env = pier_makeEnv();
+test('-adminlist and -adminremove stay silent for the owner outside LINE_GROUP_ID, even though they ARE the owner', async () => {
+  const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'CONTROL_GROUP' }); // different group than where the command is sent
+  await pier_env.BOT_KV.put('self_admins', JSON.stringify([{ userId: 'U_a', displayName: 'Alpha', addedAt: 'x' }]));
+
+  const pier_req = await pier_buildWebhookRequest([pier_groupEvent('-adminlist', 'U_owner')], pier_env.LINE_CHANNEL_SECRET); // sent in g1, not CONTROL_GROUP
+  await pier_handleWebhook(pier_req, pier_env, pier_fakeExecCtx);
+
+  assert.equal(
+    pier_sentRequests.find((r) => r.url.includes('/message/reply')),
+    undefined,
+    'wrong group must stay silent even for the true owner'
+  );
+});
+
+test('-setadminpass is owner-only, and only usable inside LINE_GROUP_ID, and never echoes the phrase back', async () => {
+  const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'g1' });
 
   const pier_deniedReq = await pier_buildWebhookRequest(
     [pier_groupEvent('-setadminpass hunter2', 'U_random')],
@@ -187,4 +202,36 @@ test('-setadminpass is owner-only and never echoes the phrase back', async () =>
 
   const pier_replyCall = pier_sentRequests.find((r) => r.url.includes('/message/reply'));
   assert.ok(!pier_replyCall.body.messages[0].text.includes('hunter2'), 'the confirmation must not echo the phrase');
+});
+
+test('-setadminpass stays silent for the owner outside LINE_GROUP_ID', async () => {
+  const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'CONTROL_GROUP' });
+
+  const pier_req = await pier_buildWebhookRequest([pier_groupEvent('-setadminpass hunter2', 'U_owner')], pier_env.LINE_CHANNEL_SECRET); // sent in g1
+  await pier_handleWebhook(pier_req, pier_env, pier_fakeExecCtx);
+
+  assert.equal(await pier_env.BOT_KV.get('admin_passphrase'), null, 'wrong group must not let even the owner set the phrase');
+  assert.equal(
+    pier_sentRequests.find((r) => r.url.includes('/message/reply')),
+    undefined
+  );
+});
+
+test('-help is usable anywhere by any admin, and includes the admin-management section only for the true owner', async () => {
+  const pier_env = pier_makeEnv();
+  await pier_env.BOT_KV.put('self_admins', JSON.stringify([{ userId: 'U_selfadmin', displayName: 'Selfy', addedAt: 'x' }]));
+
+  const pier_ownerReq = await pier_buildWebhookRequest([pier_groupEvent('-help', 'U_owner')], pier_env.LINE_CHANNEL_SECRET);
+  await pier_handleWebhook(pier_ownerReq, pier_env, pier_fakeExecCtx);
+  const pier_ownerReply = pier_sentRequests.find((r) => r.url.includes('/message/reply'));
+  assert.match(pier_ownerReply.body.messages[0].text, /-adminlist/);
+  assert.match(pier_ownerReply.body.messages[0].text, /-setadminpass/);
+
+  pier_sentRequests = [];
+  const pier_selfAdminReq = await pier_buildWebhookRequest([pier_groupEvent('-help', 'U_selfadmin')], pier_env.LINE_CHANNEL_SECRET);
+  await pier_handleWebhook(pier_selfAdminReq, pier_env, pier_fakeExecCtx);
+  const pier_selfAdminReply = pier_sentRequests.find((r) => r.url.includes('/message/reply'));
+  assert.ok(pier_selfAdminReply, 'a self-added admin should still get the help menu');
+  assert.ok(!pier_selfAdminReply.body.messages[0].text.includes('-adminlist'), 'a self-added admin must never see these commands exist');
+  assert.ok(!pier_selfAdminReply.body.messages[0].text.includes('-setadminpass'));
 });

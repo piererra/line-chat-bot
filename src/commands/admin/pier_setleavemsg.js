@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // -setleavemsg <text> — set this group's leave message template.
 
 import { pier_scopedKey } from '../../lib/pier_kv.js';

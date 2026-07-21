@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Text/message formatting helpers shared across commands and events.
 
 import { pier_levelForCount } from './pier_kv.js';

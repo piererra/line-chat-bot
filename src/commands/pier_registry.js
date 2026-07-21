@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Command registry — maps command modules for the text-message dispatcher
 // in webhook.js. Each module exports pier_matches(text) and
 // pier_handle(ctx). Order matters: it's checked in this order, matching

@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // KV-backed state: known groups, known members (with per-group message
 // counts, levels, birthdays), per-group settings (welcome/leave templates,
 // sticker triggers), and the KV health check used by -status.

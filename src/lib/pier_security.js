@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Webhook signature verification.
 
 // Plain === on the computed vs. received signature leaks timing

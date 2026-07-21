@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // !leaderboard [n] — most active members by weekly message count.
 
 import { pier_parseKnownMembers, pier_scopedKey } from '../../lib/pier_kv.js';

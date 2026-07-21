@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // !setbirthday MM-DD — self-service, always sets the sender's own
 // birthday, never someone else's. Stored as MM-DD only (no year), scoped
 // to this group, same pattern as everything else in this bot. Checked

@@ -1,5 +1,7 @@
 # line-chat-bot
 
+**Coded by: Piererra Felldiaz**
+
 A LINE Messaging API bot for the group chat. Runs on Cloudflare Workers —
 same hosting pattern as the Discord bot.
 

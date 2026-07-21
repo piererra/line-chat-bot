@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Thin wrappers around the LINE Messaging API HTTP endpoints.
 
 import { pier_LINE_API, pier_EXTERNAL_FETCH_TIMEOUT_MS } from './pier_constants.js';

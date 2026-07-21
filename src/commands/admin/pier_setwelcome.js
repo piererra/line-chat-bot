@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // -setwelcome <text> — set this group's welcome message template.
 
 import { pier_scopedKey } from '../../lib/pier_kv.js';

@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Handles the memberLeft event — someone leaves a group/room.
 
 import { pier_getChatId, pier_getLeaveTemplate, pier_untrackKnownMember, pier_parseKnownMembers, pier_scopedKey } from '../lib/pier_kv.js';

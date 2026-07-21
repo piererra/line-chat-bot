@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // !help — public command list.
 
 import { pier_isWhoamiEnabled } from '../../lib/pier_auth.js';

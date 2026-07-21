@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Handles the memberJoined event — someone new joins a group/room.
 
 import { pier_getChatId, pier_trackKnownMember, pier_getWelcomeTemplate } from '../lib/pier_kv.js';

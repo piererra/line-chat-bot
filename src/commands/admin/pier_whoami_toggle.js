@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // -whoami on/off — a global, owner-only switch — enables/disables the
 // public !whoami command bot-wide, across every group, not just this
 // one. Stays on the admin '-' prefix since it's an owner-only toggle,

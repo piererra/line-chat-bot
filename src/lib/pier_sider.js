@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // "Sider" caller-out — see pier_constants.js for the feature description.
 
 import { pier_SIDER_COOLDOWN_MS, pier_SIDER_CHANCE, pier_SIDER_PHRASES } from './pier_constants.js';

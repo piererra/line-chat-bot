@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { pier_frame, pier_buildMentionMessage, pier_buildLeaderboardText, pier_resolveMentionedUserId } from '../src/lib/pier_format.js';

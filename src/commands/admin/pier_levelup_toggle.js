@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // -levelup on/off — per-group toggle for level-up congratulation messages.
 
 import { pier_scopedKey } from '../../lib/pier_kv.js';

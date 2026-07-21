@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { pier_timingSafeEqual, pier_verifySignature } from '../src/lib/pier_security.js';

@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Bot-level admin/owner permission checks and the global !whoami toggle.
 
 import { pier_isSelfAdmin } from './pier_kv.js';

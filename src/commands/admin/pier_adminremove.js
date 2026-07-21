@@ -1,7 +1,9 @@
-// -adminremove <number> — owner-only. Removes the self-added admin at
-// that position (matching -adminlist's numbering) and revokes their
-// admin status immediately. Hidden from self-added admins the same way
-// as -adminlist — see that file's comment.
+// Coded by: Piererra Felldiaz
+// -adminremove <number> — owner-only, and only usable inside
+// LINE_GROUP_ID — same restriction as -adminlist. Removes the
+// self-added admin at that position (matching -adminlist's numbering)
+// and revokes their admin status immediately. Hidden from self-added
+// admins the same way as -adminlist — see that file's comment.
 
 import { pier_removeSelfAdminAt } from '../../lib/pier_kv.js';
 import { pier_isOwner } from '../../lib/pier_auth.js';
@@ -11,8 +13,9 @@ export function pier_matches(pier_text) {
 }
 
 export async function pier_handle(pier_ctx) {
-  const { env: pier_env, event: pier_event, text: pier_text } = pier_ctx;
+  const { env: pier_env, event: pier_event, text: pier_text, chatId: pier_chatId } = pier_ctx;
   if (!pier_isOwner(pier_env, pier_event.source.userId)) return null;
+  if (!pier_env.LINE_GROUP_ID || pier_chatId !== pier_env.LINE_GROUP_ID) return null;
 
   const pier_arg = pier_text.slice('-adminremove'.length).trim();
   const pier_index = parseInt(pier_arg, 10);

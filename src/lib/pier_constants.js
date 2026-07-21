@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Shared constant values used across the bot. Centralized here so every
 // module (lib, events, scheduled, commands) references the same values
 // instead of redefining them.

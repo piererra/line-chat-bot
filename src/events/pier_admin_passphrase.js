@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // The DM-only admin self-add trigger. Deliberately not a "-" command —
 // the bot's admin gate blocks any "-"-prefixed message from a non-admin
 // before it's even matched against a command, which is exactly what
@@ -12,7 +13,7 @@
 // active phrase at all) produces zero reply and zero trace — the message
 // just falls through to normal handling as if this code didn't exist.
 
-import { pier_getChatId, pier_getAdminPassphrase, pier_clearAdminPassphrase, pier_addSelfAdmin, pier_isSelfAdmin } from '../lib/pier_kv.js';
+import { pier_getAdminPassphrase, pier_clearAdminPassphrase, pier_addSelfAdmin, pier_isSelfAdmin } from '../lib/pier_kv.js';
 import { pier_isOwner } from '../lib/pier_auth.js';
 import { pier_getUserProfile, pier_pushMessage } from '../lib/pier_line_api.js';
 

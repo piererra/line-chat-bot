@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Flat config (ESLint v9+). No extra `globals` package dependency —
 // runtime globals are declared by hand below, since this bot only needs
 // a handful of them.

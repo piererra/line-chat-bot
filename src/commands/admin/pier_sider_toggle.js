@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // -sider on/off — per-group toggle for the "sider" callout gag feature.
 
 import { pier_scopedKey } from '../../lib/pier_kv.js';

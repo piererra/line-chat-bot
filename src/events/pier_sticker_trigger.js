@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Sticker keyword triggers — a single global list, shared by every group
 // the bot is in. Capture stays restricted: only an admin sending a
 // sticker in the group set as LINE_GROUP_ID can add to it. Every one of

@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // !picture @name — anyone can look up another member's profile picture.
 // Only works in groups (LINE's member-profile API is group-only — a
 // multi-person room has no equivalent endpoint). See

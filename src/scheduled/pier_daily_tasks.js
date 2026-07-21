@@ -1,3 +1,4 @@
+// Coded by: Piererra Felldiaz
 // Daily scheduled tasks — run off the existing hourly cron trigger (see
 // wrangler.toml), but only actually do anything on the one tick per day
 // that lands on local 00:00 in WIB (Asia/Jakarta, UTC+7, no DST — so this
