@@ -29,3 +29,27 @@ export async function pier_verifySignature(pier_rawBody, pier_signatureHeader, p
 
   return pier_timingSafeEqual(pier_computed, pier_signatureHeader);
 }
+
+// Random admin self-add passphrase, e.g. "A1B2-C3D4-E5F6-7890" — used by
+// -setadminpass so the owner never has to invent (and risk reusing) their
+// own phrase. crypto.getRandomValues is the Workers-native CSPRNG source,
+// same trust level as the signature verification above. Uppercase
+// letters + digits only, so it's easy to read back and re-type over a DM
+// on a phone keyboard.
+const pier_PASSPHRASE_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const pier_PASSPHRASE_GROUPS = 4;
+const pier_PASSPHRASE_GROUP_LENGTH = 4;
+
+export function pier_generateAdminPassphrase() {
+  const pier_groups = [];
+  for (let pier_g = 0; pier_g < pier_PASSPHRASE_GROUPS; pier_g++) {
+    const pier_bytes = new Uint8Array(pier_PASSPHRASE_GROUP_LENGTH);
+    crypto.getRandomValues(pier_bytes);
+    let pier_group = '';
+    for (let pier_i = 0; pier_i < pier_PASSPHRASE_GROUP_LENGTH; pier_i++) {
+      pier_group += pier_PASSPHRASE_ALPHABET[pier_bytes[pier_i] % pier_PASSPHRASE_ALPHABET.length];
+    }
+    pier_groups.push(pier_group);
+  }
+  return pier_groups.join('-');
+}

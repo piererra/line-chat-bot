@@ -23,6 +23,8 @@ import * as pier_groups from './admin/pier_groups.js';
 import * as pier_adminlist from './admin/pier_adminlist.js';
 import * as pier_adminremove from './admin/pier_adminremove.js';
 import * as pier_setadminpass from './admin/pier_setadminpass.js';
+import * as pier_showadminpass from './admin/pier_showadminpass.js';
+import * as pier_clearadminpass from './admin/pier_clearadminpass.js';
 
 // Public ('!' prefix) commands — open to everyone, no admin gate. Each
 // handler sends its own reply and the dispatcher returns immediately
@@ -46,4 +48,6 @@ export const pier_adminCommands = [
   pier_adminlist,
   pier_adminremove,
   pier_setadminpass,
+  pier_showadminpass,
+  pier_clearadminpass,
 ];

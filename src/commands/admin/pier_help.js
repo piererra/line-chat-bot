@@ -24,8 +24,11 @@ export async function pier_handle(pier_ctx) {
     ? '\n\n── Admin management (LINE_GROUP_ID only) ──\n' +
       '➸ -adminlist — list self-added admins\n' +
       '➸ -adminremove <number>\n' +
-      '➸ -setadminpass <phrase> — DM-claimable,\n' +
-      '  one-time use'
+      '➸ -setadminpass — generate a random\n' +
+      '  DM-claimable code, one-time use\n' +
+      '➸ -showadminpass — re-show the active\n' +
+      '  code\n' +
+      '➸ -clearadminpass — revoke it early'
     : '';
 
   return [

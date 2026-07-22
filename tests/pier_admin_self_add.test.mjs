@@ -186,28 +186,30 @@ test('-adminlist and -adminremove stay silent for the owner outside LINE_GROUP_I
   );
 });
 
-test('-setadminpass is owner-only, and only usable inside LINE_GROUP_ID, and never echoes the phrase back', async () => {
+test('-setadminpass is owner-only, and only usable inside LINE_GROUP_ID, and generates a random A1B2-C3D4-E5F6-7890-style code that IS echoed back', async () => {
   const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'g1' });
 
-  const pier_deniedReq = await pier_buildWebhookRequest(
-    [pier_groupEvent('-setadminpass hunter2', 'U_random')],
-    pier_env.LINE_CHANNEL_SECRET
-  );
+  const pier_deniedReq = await pier_buildWebhookRequest([pier_groupEvent('-setadminpass', 'U_random')], pier_env.LINE_CHANNEL_SECRET);
   await pier_handleWebhook(pier_deniedReq, pier_env, pier_fakeExecCtx);
   assert.equal(await pier_env.BOT_KV.get('admin_passphrase'), null, 'a non-owner must not be able to set the passphrase');
 
-  const pier_ownerReq = await pier_buildWebhookRequest([pier_groupEvent('-setadminpass hunter2', 'U_owner')], pier_env.LINE_CHANNEL_SECRET);
+  const pier_ownerReq = await pier_buildWebhookRequest([pier_groupEvent('-setadminpass', 'U_owner')], pier_env.LINE_CHANNEL_SECRET);
   await pier_handleWebhook(pier_ownerReq, pier_env, pier_fakeExecCtx);
-  assert.equal(await pier_env.BOT_KV.get('admin_passphrase'), 'hunter2');
+
+  const pier_stored = await pier_env.BOT_KV.get('admin_passphrase');
+  assert.match(pier_stored, /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/, 'stored code must match the generated format');
 
   const pier_replyCall = pier_sentRequests.find((r) => r.url.includes('/message/reply'));
-  assert.ok(!pier_replyCall.body.messages[0].text.includes('hunter2'), 'the confirmation must not echo the phrase');
+  assert.ok(
+    pier_replyCall.body.messages[0].text.includes(pier_stored),
+    'the confirmation must echo the generated code back, since the owner never chose it'
+  );
 });
 
 test('-setadminpass stays silent for the owner outside LINE_GROUP_ID', async () => {
   const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'CONTROL_GROUP' });
 
-  const pier_req = await pier_buildWebhookRequest([pier_groupEvent('-setadminpass hunter2', 'U_owner')], pier_env.LINE_CHANNEL_SECRET); // sent in g1
+  const pier_req = await pier_buildWebhookRequest([pier_groupEvent('-setadminpass', 'U_owner')], pier_env.LINE_CHANNEL_SECRET); // sent in g1
   await pier_handleWebhook(pier_req, pier_env, pier_fakeExecCtx);
 
   assert.equal(await pier_env.BOT_KV.get('admin_passphrase'), null, 'wrong group must not let even the owner set the phrase');
@@ -215,6 +217,49 @@ test('-setadminpass stays silent for the owner outside LINE_GROUP_ID', async () 
     pier_sentRequests.find((r) => r.url.includes('/message/reply')),
     undefined
   );
+});
+
+test('-showadminpass re-displays the active code, owner-only, LINE_GROUP_ID-only', async () => {
+  const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'g1' });
+  await pier_env.BOT_KV.put('admin_passphrase', 'AAAA-BBBB-CCCC-DDDD');
+
+  const pier_deniedReq = await pier_buildWebhookRequest([pier_groupEvent('-showadminpass', 'U_random')], pier_env.LINE_CHANNEL_SECRET);
+  await pier_handleWebhook(pier_deniedReq, pier_env, pier_fakeExecCtx);
+  assert.equal(
+    pier_sentRequests.find((r) => r.url.includes('/message/reply')),
+    undefined,
+    'a non-owner must not see the code'
+  );
+
+  const pier_ownerReq = await pier_buildWebhookRequest([pier_groupEvent('-showadminpass', 'U_owner')], pier_env.LINE_CHANNEL_SECRET);
+  await pier_handleWebhook(pier_ownerReq, pier_env, pier_fakeExecCtx);
+  const pier_replyCall = pier_sentRequests.find((r) => r.url.includes('/message/reply'));
+  assert.match(pier_replyCall.body.messages[0].text, /AAAA-BBBB-CCCC-DDDD/);
+});
+
+test('-showadminpass reports no active code when none is set', async () => {
+  const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'g1' });
+
+  const pier_req = await pier_buildWebhookRequest([pier_groupEvent('-showadminpass', 'U_owner')], pier_env.LINE_CHANNEL_SECRET);
+  await pier_handleWebhook(pier_req, pier_env, pier_fakeExecCtx);
+  const pier_replyCall = pier_sentRequests.find((r) => r.url.includes('/message/reply'));
+  assert.match(pier_replyCall.body.messages[0].text, /No active admin passphrase/);
+});
+
+test('-clearadminpass revokes the active code, owner-only, LINE_GROUP_ID-only', async () => {
+  const pier_env = pier_makeEnv({ LINE_GROUP_ID: 'g1' });
+  await pier_env.BOT_KV.put('admin_passphrase', 'AAAA-BBBB-CCCC-DDDD');
+
+  const pier_deniedReq = await pier_buildWebhookRequest([pier_groupEvent('-clearadminpass', 'U_random')], pier_env.LINE_CHANNEL_SECRET);
+  await pier_handleWebhook(pier_deniedReq, pier_env, pier_fakeExecCtx);
+  assert.equal(await pier_env.BOT_KV.get('admin_passphrase'), 'AAAA-BBBB-CCCC-DDDD', 'a non-owner must not be able to clear it');
+
+  const pier_ownerReq = await pier_buildWebhookRequest([pier_groupEvent('-clearadminpass', 'U_owner')], pier_env.LINE_CHANNEL_SECRET);
+  await pier_handleWebhook(pier_ownerReq, pier_env, pier_fakeExecCtx);
+  assert.equal(await pier_env.BOT_KV.get('admin_passphrase'), null, 'the owner clearing it must remove the code from KV');
+
+  const pier_replyCall = pier_sentRequests.find((r) => r.url.includes('/message/reply'));
+  assert.match(pier_replyCall.body.messages[0].text, /cleared/i);
 });
 
 test('-help is usable anywhere by any admin, and includes the admin-management section only for the true owner', async () => {
