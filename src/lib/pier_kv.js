@@ -202,18 +202,21 @@ export async function pier_recordMessage(pier_env, pier_chatId, pier_userId) {
         if (pier_newLevel > pier_oldLevel) {
           pier_leveledUp = { userId: pier_userId, displayName: pier_existing.displayName, newLevel: pier_newLevel };
         }
-        // The very first lookup can fail (network blip, LINE API not yet
-        // ready to resolve a brand-new member's profile, etc.) and get
-        // stuck showing 'Unknown' forever, since it was only ever tried
-        // once. Retry on every subsequent message until it resolves, so
-        // it self-heals instead of staying wrong permanently.
-        if (!pier_existing.displayName || pier_existing.displayName === 'Unknown') {
-          try {
-            const pier_profile = await pier_getGroupMemberProfile(pier_chatId, pier_userId, pier_env);
-            if (pier_profile?.displayName) pier_existing.displayName = pier_profile.displayName;
-          } catch (pier_err) {
-            console.error('Profile lookup retry failed:', pier_err);
+        // Re-check on every message rather than only once: someone can
+        // change their LINE display name at any point, and without this
+        // the leaderboard/level-up text would keep showing whatever name
+        // was captured the very first time they spoke, forever. Cheap
+        // enough since it's a single profile lookup per message and is
+        // wrapped in try/catch, so a failed/rate-limited lookup just
+        // leaves the existing name in place rather than blocking the
+        // message count update above.
+        try {
+          const pier_profile = await pier_getGroupMemberProfile(pier_chatId, pier_userId, pier_env);
+          if (pier_profile?.displayName && pier_profile.displayName !== pier_existing.displayName) {
+            pier_existing.displayName = pier_profile.displayName;
           }
+        } catch (pier_err) {
+          console.error('Profile lookup retry failed:', pier_err);
         }
       } else {
         let pier_displayName = 'Unknown';
